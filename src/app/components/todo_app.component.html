@@ -1,0 +1,55 @@
+<div class="container">
+    <h1>Todo List</h1>
+
+    <div class="search-group">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Tìm kiếm...">
+    </div>
+
+    <div class="filter-group">
+        <button [class.active]="filter === 'all'" (click)="filter = 'all'">Tất cả</button>
+        <button [class.active]="filter === 'active'" (click)="filter = 'active'">Chưa hoàn thành</button>
+        <button [class.active]="filter === 'completed'" (click)="filter = 'completed'">Đã hoàn thành</button>
+        <button (click)="clearCompleted()">Xóa đã hoàn thành</button>
+        <select [(ngModel)]="sortBy">
+            <option value="title">Sắp xếp theo tiêu đề</option>
+            <option value="dueDate">Sắp xếp theo ngày hết hạn</option>
+            <option value="priority">sắp xếp theo ưu tiên</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <input type="text" [(ngModel)]="newTodo" (keyup.enter)="addTodo()" placeholder="Thêm mới ...">
+        <input type="date" [(ngModel)]="newDueDate">
+        <select [(ngModel)]="newPriority">
+            <option value="low">Thấp</option>
+            <option value="medium">Trung bình</option>
+            <option value="high">Cao</option>
+        </select>
+        <button (click)="addTodo()">Thêm mới</button>
+    </div>
+
+    <ul class="todo-list">
+        <li *ngFor="let todo of filteredTodos" [@todoAnimation] [class.completed]="todo.completed"
+            [class.overdue]="todo.dueDate && !todo.completed && todo.dueDate < today" [ngClass]="todo.priority">
+            <input type="checkbox" [checked]="todo.completed" (change)="toggleTodo(todo.id)">
+
+            <ng-container *ngIf="editingTodo?.id === todo.id; else showTitle">
+                <div class="edit-container">
+                    <input type="text" [(ngModel)]="editedTitle" (keyup.enter)="saveEdit(todo.id)" (blur)="saveEdit(todo.id)">
+                    <textarea [(ngModel)]="editedNotes" placeholder="Ghi chú..." (keyup.enter)="saveEdit(todo.id)"></textarea>
+                    <button (click)="cancelEdit()">Hủy</button>
+                </div>
+            </ng-container>
+
+            <ng-template #showTitle>
+                <span>{{todo.title}}</span>
+                <span *ngIf="todo.dueDate" class="due-date">
+                    (Hạn: {{todo.dueDate | date: 'dd/MM/yyyy'}})
+                </span>
+                <span *ngIf="todo.priority" class="priority">Ưu tiên: {{todo.priority}}</span>
+                <button class="edit" (click)="startEdit(todo)">Sửa</button>
+                <button class="delete" (click)="deleteTodo(todo.id)">Xóa</button>
+            </ng-template>
+        </li>
+    </ul>
+</div>

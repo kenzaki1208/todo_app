@@ -1,0 +1,129 @@
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input {
+    flex: 1;
+    padding: 8px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.todo-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.completed span {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.delete {
+    margin-left: auto;
+    background-color: #dc3545;
+}
+
+.delete:hover {
+    background-color: #b02a37;
+}
+
+.edit {
+    margin-left: 10px;
+    background-color: #28a745;
+}
+  
+.edit:hover {
+    background-color: #218838;
+}
+
+.search-group {
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-group button {
+    padding: 8px 16px;
+    background-color: #429cfb;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.filter-group button:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.due-date {
+    margin-left: 10px;
+    color: #666;
+}
+
+.overdue {
+    background-color: #ffe6e6;
+}
+
+.low {
+    border-left: 4px solid #28a745;
+}
+
+.medium {
+    border-left: 4px solid #ffc107;
+}
+
+.high {
+    border-left: 4px solid #dc3545;
+}
+
+.priority {
+    margin-left: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.todo-detail {
+    flex: 1;
+}
+
+.edit-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.edit-container textarea {
+    padding: 5px;
+    font-size: 14px;
+    resize: vertical;
+}
