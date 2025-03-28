@@ -1,0 +1,47 @@
+h1 {
+    text-align: center;
+    font-size: 24px;
+}
+
+p {
+    text-align: center;
+    font-size: 16px;
+}
+
+.maze {
+    display: inline-block;
+    margin: 20px auto;
+    text-align: center;
+    margin-left: 650px;
+}
+
+.row {
+    display: flex;
+}
+
+.cell {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #000;
+    background-color: #fff;
+}
+
+.wall {
+    background-color: #333;
+}
+
+.player {
+    background-color: #00f;
+}
+
+.end {
+    background-color: #f00;
+}
+
+button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}

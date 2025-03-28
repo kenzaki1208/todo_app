@@ -1,0 +1,15 @@
+<div class="game-container">
+    <h1>Game đoán số</h1>
+
+    <p *ngIf="!isGameOver">{{message}}</p>
+    <p *ngIf="isGameOver" class="success">Chúc mừng! bạn đã đoán đúng số {{targetNumber}}</p>
+
+    <div *ngIf="!isGameOver" class="input-section">
+        <input type="number" [(ngModel)]="userGuess" placeholder="Nhập số từ 1 đến 100"/>
+        <button (click)="guessNumber()">Đoán</button>
+    </div>
+
+    <button *ngIf="isGameOver" (click)="resetGame()">Chơi lại</button>
+
+    <p>Số lần thử: {{ attemps }}</p>
+</div>

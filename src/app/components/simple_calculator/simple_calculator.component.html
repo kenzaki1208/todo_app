@@ -1,0 +1,27 @@
+<div class="calculator">
+    <h1>Máy tính cơ bản</h1>
+
+    <input type="text" [(ngModel)]="result" readonly class="display">
+
+    <div class="buttons">
+        <button (click)="appendToResult('1')">1</button>
+        <button (click)="appendToResult('2')">2</button>
+        <button (click)="appendToResult('3')">3</button>
+        <button (click)="appendToResult('+')">+</button>
+
+        <button (click)="appendToResult('4')">4</button>
+        <button (click)="appendToResult('5')">5</button>
+        <button (click)="appendToResult('6')">6</button>
+        <button (click)="appendToResult('-')">-</button>
+
+        <button (click)="appendToResult('7')">7</button>
+        <button (click)="appendToResult('8')">8</button>
+        <button (click)="appendToResult('9')">9</button>
+        <button (click)="appendToResult('*')">*</button>
+
+        <button (click)="appendToResult('0')">0</button>
+        <button (click)="appendToResult('/')">/</button>
+        <button (click)="calculate()">=</button>
+        <button (click)="clear()">C</button>
+    </div>
+</div>

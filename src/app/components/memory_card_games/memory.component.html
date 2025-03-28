@@ -1,0 +1,14 @@
+<h1>Game xếp thẻ</h1>
+
+<p>Số lần lật: {{moves}}</p>
+
+<div class="game-board">
+    <div *ngFor = "let card of cards" class="card" 
+    [class.flipped]="card.flipped || card.matched" (click)="flipCard(card.id)">
+        <span *ngIf="card.flipped || card.matched">{{card.value}}</span>
+        <span *ngIf="!card.flipped && !card.matched">?</span>
+    </div>
+</div>
+
+<p *ngIf="gameWon">Chúc mừng! Bạn đã thắng sau {{moves}} lần lật</p>
+<button (click)="resetGame()">Chơi lại</button>

@@ -1,0 +1,16 @@
+<h1>Game tìm đường</h1>
+
+<p>Dùng phím mũi tên để di chuyển đến đích (ô màu đỏ)</p>
+
+<div class="maze">
+    <div *ngFor="let row of maze; let y = index" class="row">
+        <div 
+            *ngFor="let cell of row; let x = index" class="cell" [class.wall]="cell === 1"
+            [class.player]="playerPosition.x === x && playerPosition.y === y"
+            [class.end]="endPosition.x === x && endPosition.y === y">
+        </div>
+    </div>
+</div>
+
+<p *ngIf="gameWon">Chúc mừng! Bạn đã đến đích!</p>
+<button (click)="resetGame()">Chơi lại</button>

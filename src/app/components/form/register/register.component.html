@@ -1,0 +1,16 @@
+<h2>Đăng ký</h2>
+<form (ngSubmit)="onRegister(registerForm)" #registerForm="ngForm">
+  <div>
+    <label>Email:</label>
+    <input type="email" name="email" ngModel required email #email="ngModel">
+    <span *ngIf="email.invalid && email.touched">Email không hợp lệ</span>
+  </div>
+  <div>
+    <label>Mật khẩu:</label>
+    <input type="password" name="password" ngModel required minlength="6" #password="ngModel">
+    <span *ngIf="password.invalid && password.touched">Mật khẩu phải có ít nhất 6 ký tự</span>
+  </div>
+  <button type="submit" [disabled]="registerForm.invalid">Đăng ký</button>
+</form>
+<p>Bạn đã có tài khoản? <a routerLink="/login">Đăng nhập</a></p>
+<p *ngIf="message">{{ message }}</p>

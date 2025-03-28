@@ -1,0 +1,185 @@
+Tôi xin lỗi nếu phần phân tích trước đó chưa đủ chi tiết để bạn hiểu rõ. Dưới đây, tôi sẽ giải thích từng file một cách kỹ lưỡng hơn, bao gồm cách chúng hoạt động từng bước, cách dữ liệu di chuyển giữa chúng, và cách chúng phối hợp để tạo thành ứng dụng "Todo List" hoàn chỉnh. Tôi sẽ cố gắng trình bày rõ ràng, đầy đủ và dễ hiểu hơn.
+
+---
+
+ 1. File HTML (`todo_app.component.html`)
+# Vai trò:
+File này là giao diện chính của ứng dụng, hiển thị danh sách công việc, các nút điều khiển, và ô nhập liệu. Nó sử dụng các directive của Angular để liên kết dữ liệu và xử lý sự kiện từ file component.
+
+# Cấu trúc chi tiết và cách hoạt động:
+- Tiêu đề: `<h1>Todo List</h1>` chỉ đơn giản là tiêu đề tĩnh, không có logic gì thêm.
+- Ô tìm kiếm:
+  - `<input type="text" [(ngModel)]="searchQuery" placeholder="Tìm kiếm...">`
+  - `[(ngModel)]="searchQuery"`: Liên kết hai chiều với biến `searchQuery` trong component. Khi người dùng nhập từ khóa, `searchQuery` được cập nhật ngay lập tức, và getter `filteredTodos` trong component sẽ lọc lại danh sách công việc dựa trên từ khóa này.
+- Nhóm bộ lọc và sắp xếp:
+  - `<div class="filter-group">` chứa các nút lọc và dropdown sắp xếp:
+    - Nút lọc: 
+      - `<button [class.active]="filter === 'all'" (click)="filter = 'all'">Tất cả</button>` (và tương tự cho "Chưa hoàn thành", "Đã hoàn thành").
+      - `[class.active]`: Thêm class `active` nếu giá trị của `filter` khớp với nút (ví dụ: `filter = 'all'`), giúp làm nổi bật nút đang chọn.
+      - `(click)="filter = 'value'"`: Khi nhấn nút, biến `filter` trong component được gán giá trị tương ứng ("all", "active", "completed"), kích hoạt `filteredTodos` cập nhật danh sách.
+    - Nút xóa hoàn thành: 
+      - `<button (click)="clearCompleted()">Xóa đã hoàn thành</button>` gọi hàm `clearCompleted()` trong component để xóa các công việc đã hoàn thành.
+    - Dropdown sắp xếp: 
+      - `<select [(ngModel)]="sortBy">` liên kết hai chiều với `sortBy`. Khi người dùng chọn một tùy chọn (title, dueDate, priority), `sortBy` thay đổi, và `filteredTodos` sẽ sắp xếp lại danh sách dựa trên tiêu chí đó.
+- Nhóm nhập liệu:
+  - `<div class="input-group">` chứa các ô để thêm công việc mới:
+    - Tiêu đề: `<input [(ngModel)]="newTodo" (keyup.enter)="addTodo()">` liên kết với `newTodo`. Nhấn Enter hoặc nút "Thêm mới" sẽ gọi `addTodo()`.
+    - Ngày hết hạn: `<input type="date" [(ngModel)]="newDueDate">` liên kết với `newDueDate`.
+    - Ưu tiên: `<select [(ngModel)]="newPriority">` liên kết với `newPriority`, mặc định là "low".
+    - Nút thêm: `<button (click)="addTodo()">Thêm mới</button>` gọi `addTodo()` để thêm công việc.
+- Danh sách công việc:
+  - `<ul class="todo-list">` hiển thị danh sách từ `filteredTodos`:
+    - `*ngFor="let todo of filteredTodos"`: Lặp qua mảng `filteredTodos` để tạo từng `<li>` cho mỗi công việc.
+    - `[@todoAnimation]`: Áp dụng animation (định nghĩa trong component) khi công việc được thêm hoặc xóa.
+    - Class động:
+      - `[class.completed]="todo.completed"`: Thêm class `completed` nếu công việc hoàn thành.
+      - `[class.overdue]="todo.dueDate && !todo.completed && todo.dueDate < today"`: Thêm class `overdue` nếu công việc chưa hoàn thành và quá hạn.
+      - `[ngClass]="todo.priority"`: Áp dụng class tương ứng với mức ưu tiên (low, medium, high).
+    - Checkbox: `<input type="checkbox" [checked]="todo.completed" (change)="toggleTodo(todo.id)">` hiển thị trạng thái hoàn thành và gọi `toggleTodo()` khi thay đổi.
+    - Chế độ hiển thị/chỉnh sửa:
+      - `*ngIf="editingTodo?.id === todo.id; else showTitle"`: Nếu công việc đang được chỉnh sửa (so sánh `id`), hiển thị ô nhập liệu:
+        - `<input [(ngModel)]="editedTitle">`: Chỉnh sửa tiêu đề.
+        - `<textarea [(ngModel)]="editedNotes">`: Chỉnh sửa ghi chú.
+        - `<button (click)="saveEdit(todo.id)">`: Lưu thay đổi khi nhấn Enter hoặc mất focus.
+        - `<button (click)="cancelEdit()">Hủy</button>`: Hủy chỉnh sửa.
+      - Ngược lại (`#showTitle`): Hiển thị thông tin công việc:
+        - `<span>{{todo.title}}</span>`: Tiêu đề.
+        - `<span>{{todo.dueDate | date: 'dd/MM/yyyy'}}`: Ngày hết hạn (định dạng).
+        - `<span>Ưu tiên: {{todo.priority}}</span>`: Mức ưu tiên.
+        - Nút "Sửa" gọi `startEdit(todo)` và "Xóa" gọi `deleteTodo(todo.id)`.
+
+# Cách hoạt động từng bước:
+- Người dùng nhập từ khóa tìm kiếm → `searchQuery` cập nhật → `filteredTodos` lọc danh sách → Giao diện hiển thị danh sách mới.
+- Nhấn nút lọc → `filter` thay đổi → `filteredTodos` lọc lại → Giao diện cập nhật.
+- Nhập công việc mới và nhấn "Thêm mới" → `addTodo()` xử lý → Giao diện thêm `<li>` mới với animation.
+
+---
+
+ 2. File SCSS (`todo_app.component.scss`)
+# Vai trò:
+File này định dạng giao diện, giúp phân biệt trạng thái công việc và tạo bố cục dễ sử dụng.
+
+# Chi tiết từng kiểu:
+- `.container`: Giới hạn chiều rộng tối đa (`1000px`), căn giữa, padding 20px để tạo không gian.
+- `.input-group`: Sắp xếp các ô nhập liệu và nút theo hàng ngang (`flex`), cách nhau 10px, ô nhập liệu chiếm toàn bộ không gian còn lại (`flex: 1`).
+- `button`: Nền xanh mặc định (`#007bff`), đổi màu khi hover (`#0056b3`), không viền, con trỏ chuột khi hover.
+- `.todo-list li`: Mỗi công việc là một hàng flex, cách nhau 10px, có viền dưới để phân tách.
+- `.completed span`: Gạch ngang văn bản và đổi màu xám (`#888`) khi hoàn thành.
+- Nút đặc biệt:
+  - `.delete`: Nền đỏ (`#dc3545`), đổi màu khi hover (`#b02a37`), căn phải (`margin-left: auto`).
+  - `.edit`: Nền xanh lá (`#28a745`), đổi màu khi hover (`#218838`).
+- `.filter-group`: Các nút lọc dạng flex, nền xanh nhạt (`#429cfb`), đổi màu khi hover (`#007bff`).
+- `.overdue`: Nền đỏ nhạt (`#ffe6e6`) cho công việc quá hạn.
+- Mức ưu tiên:
+  - `.low`: Viền trái xanh (`#28a745`).
+  - `.medium`: Viền trái vàng (`#ffc107`).
+  - `.high`: Viền trái đỏ (`#dc3545`).
+- `.edit-container`: Định dạng ô chỉnh sửa với textarea có thể thay đổi kích thước dọc (`resize: vertical`).
+
+# Cách hoạt động:
+- SCSS không xử lý logic, chỉ áp dụng kiểu dáng dựa trên class được thêm từ HTML. Ví dụ: Khi `todo.completed = true`, class `completed` được thêm, văn bản tự động gạch ngang.
+
+---
+
+ 3. File TypeScript - Model (`todo.model.ts`)
+# Vai trò:
+File này định nghĩa cấu trúc dữ liệu cho một công việc (Todo), đảm bảo tính nhất quán giữa các file khác.
+
+# Chi tiết:
+- Interface `Todo`:
+  - `id: number`: Định danh duy nhất cho mỗi công việc.
+  - `title: string`: Tiêu đề bắt buộc.
+  - `completed: boolean`: Trạng thái hoàn thành (true/false).
+  - `dueDate?: Date`: Ngày hết hạn (tùy chọn, có thể undefined).
+  - `priority?: 'low' | 'medium' | 'high'`: Mức ưu tiên (tùy chọn, giới hạn 3 giá trị).
+  - `notes?: string`: Ghi chú (tùy chọn).
+
+# Cách hoạt động:
+- Interface này không có logic, chỉ là bản thiết kế cho các đối tượng Todo. Ví dụ, khi thêm công việc mới trong service, đối tượng phải tuân theo cấu trúc này.
+
+---
+
+ 4. File TypeScript - Service (`todo.service.ts`)
+# Vai trò:
+File này là lớp trung gian quản lý dữ liệu Todo, cung cấp các phương thức để thêm, xóa, cập nhật, và lưu trữ dữ liệu trong `localStorage`.
+
+# Chi tiết từng phần:
+- Khởi tạo:
+  - `private todos: Todo[]`: Mảng lưu danh sách công việc.
+  - Trong `constructor`, kiểm tra `localStorage`:
+    - Nếu có dữ liệu (`savedTodos`), parse JSON và chuyển `dueDate` thành đối tượng `Date`.
+- `saveToLocalStorage()`: Chuyển `todos` thành chuỗi JSON và lưu vào `localStorage`.
+- `getTodos()`: Trả về bản sao của `todos` để tránh thay đổi trực tiếp mảng gốc.
+- `addTodo(title, dueDate?, priority?, notes?)`:
+  - Tạo đối tượng `newTodo` với `id` tăng dần, `completed = false`, và các giá trị từ tham số.
+  - Đẩy vào `todos`, lưu vào `localStorage`, trả về danh sách mới.
+- `toggleTodo(id)`:
+  - Tìm công việc theo `id`, đảo ngược `completed`, lưu lại, trả về danh sách.
+- `deleteTodo(id)`:
+  - Lọc bỏ công việc có `id` tương ứng, lưu lại, trả về danh sách.
+- `updateTodo(id, newTitle, newNotes?)`:
+  - Tìm công việc, cập nhật `title` và `notes` (nếu có), lưu lại, trả về danh sách.
+- `clearCompleted()`:
+  - Lọc bỏ công việc có `completed = true`, lưu lại, trả về danh sách.
+
+# Cách hoạt động từng bước:
+- Thêm công việc: `addTodo('Task 1')` → Tạo `{id: 1, title: 'Task 1', completed: false, ...}` → Đẩy vào `todos` → Lưu `localStorage`.
+- Xóa: `deleteTodo(1)` → Lọc `todos` → Cập nhật `localStorage`.
+
+---
+
+ 5. File TypeScript - Component (`todo_app.component.ts`)
+# Vai trò:
+File này điều khiển giao diện, xử lý sự kiện từ người dùng, và tương tác với `TodoService`.
+
+# Chi tiết từng phần:
+- Animations: 
+  - `trigger('todoAnimation')`: Hiệu ứng khi thêm (`:enter`) và xóa (`:leave`) công việc, di chuyển từ trên xuống hoặc ngược lại trong 300ms.
+- Thuộc tính:
+  - `todos`: Lấy từ `TodoService.getTodos()` khi khởi tạo.
+  - `newTodo`, `newDueDate`, `newPriority`, `newNotes`: Dữ liệu nhập mới.
+  - `filter`, `searchQuery`, `sortBy`: Điều khiển lọc và sắp xếp.
+  - `editingTodo`, `editedTitle`, `editedNotes`: Quản lý chỉnh sửa.
+  - `today`: Ngày hiện tại để kiểm tra quá hạn.
+- Getter `filteredTodos`:
+  - Sao chép `todos`, sau đó:
+    - Lọc theo `filter`: "active" (chưa hoàn thành), "completed" (đã hoàn thành), hoặc giữ nguyên ("all").
+    - Lọc theo `searchQuery`: So sánh không phân biệt hoa thường.
+    - Sắp xếp theo `sortBy`:
+      - `title`: Sắp xếp alphabet (A-Z).
+      - `dueDate`: Sắp xếp theo ngày (sớm nhất trước, không có ngày xếp cuối).
+      - `priority`: Sắp xếp theo thứ tự high > medium > low.
+- Phương thức:
+  - `addTodo()`: Nếu `newTodo` không rỗng, gọi `todoService.addTodo()`, hiển thị thông báo (Toastr), reset các ô nhập.
+  - `toggleTodo(id)`: Gọi service để đổi trạng thái, cập nhật `todos`.
+  - `deleteTodo(id)`: Gọi service để xóa, hiển thị thông báo.
+  - `startEdit(todo)`: Gán `editingTodo` và sao chép dữ liệu để chỉnh sửa.
+  - `saveEdit(id)`: Cập nhật qua service, reset trạng thái chỉnh sửa.
+  - `cancelEdit()`: Hủy chỉnh sửa, reset các giá trị.
+  - `clearCompleted()`: Gọi service để xóa công việc hoàn thành.
+
+# Cách hoạt động từng bước:
+- Khởi tạo: Lấy `todos` từ service → Hiển thị danh sách.
+- Thêm: Nhập "Task 1" → Nhấn "Thêm mới" → `addTodo()` gọi service → `todos` cập nhật → Animation chạy → Giao diện thêm `<li>`.
+- Lọc: Chọn "Chưa hoàn thành" → `filter = 'active'` → `filteredTodos` chỉ hiển thị công việc chưa hoàn thành.
+
+---
+
+ Cách 5 file phối hợp
+1. HTML: Hiển thị giao diện, gửi dữ liệu nhập vào component qua `ngModel`, gọi các hàm khi có sự kiện.
+2. SCSS: Áp dụng kiểu dáng dựa trên class từ HTML (ví dụ: `completed`, `overdue`).
+3. Model: Định nghĩa cấu trúc dữ liệu cho `todos`.
+4. Service: Quản lý dữ liệu `todos`, lưu trữ trong `localStorage`, cung cấp phương thức CRUD (Create, Read, Update, Delete).
+5. Component: Lấy dữ liệu từ service, xử lý logic lọc/sắp xếp, cập nhật giao diện khi dữ liệu thay đổi.
+
+# Luồng dữ liệu:
+- Thêm công việc: HTML (`newTodo`) → Component (`addTodo()`) → Service (`addTodo()`) → `todos` cập nhật → Component (`filteredTodos`) → HTML hiển thị.
+- Lọc: HTML (`filter`) → Component (`filteredTodos`) → HTML cập nhật danh sách.
+
+---
+
+ Ghi chú chi tiết hơn
+- Lỗi: Trong service, `dueData` trong `JSON.parse` sai chính tả (phải là `dueDate`).
+- Hiệu suất: `filteredTodos` chạy lại mỗi khi giao diện cập nhật, có thể tối ưu bằng cách memoization nếu danh sách lớn.
+- Cải thiện: Thêm xác nhận dữ liệu (ví dụ: tiêu đề không được rỗng), hoặc dùng API thay `localStorage`.
+

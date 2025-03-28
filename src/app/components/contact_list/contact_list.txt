@@ -1,0 +1,95 @@
+Tôi sẽ phân tích cách hoạt động của 3 file bạn gửi (HTML, SCSS, và TypeScript) trong ứng dụng Angular này. Đây là một ứng dụng quản lý danh sách liên hệ đơn giản với các chức năng thêm, xóa và tìm kiếm liên hệ. Hãy cùng xem chi tiết từng file và cách chúng phối hợp với nhau:
+
+---
+
+ 1. File HTML (`contact_list.component.html`)
+File này chứa giao diện người dùng của ứng dụng.
+
+# Cấu trúc và chức năng:
+- Tiêu đề: `<h1>Danh sách liên hệ</h1>` hiển thị tiêu đề chính.
+- Thêm liên hệ:
+  - Hai ô nhập liệu (`<input>`) sử dụng `[(ngModel)]` để liên kết hai chiều với thuộc tính `newContact.name` và `newContact.phone` trong component TypeScript.
+  - Nút `<button (click)="addContact()">` gọi hàm `addContact()` khi được nhấn để thêm liên hệ mới.
+- Tìm kiếm:
+  - Ô nhập liệu `<input>` với `[(ngModel)]="searchTerm"` liên kết hai chiều với biến `searchTerm`.
+  - Sự kiện `(input)="filterContacts()"` gọi hàm `filterContacts()` mỗi khi người dùng nhập để lọc danh sách liên hệ theo tên.
+- Bảng danh sách liên hệ:
+  - Sử dụng `*ngFor="let contact of filteredContacts"` để hiển thị danh sách các liên hệ trong mảng `filteredContacts`.
+  - Mỗi dòng (`<tr>`) hiển thị tên và số điện thoại của liên hệ, cùng với nút `<button (click)="deleteContact(contact)">Xóa</button>` để xóa liên hệ đó.
+
+# Cách hoạt động:
+- Giao diện này tương tác trực tiếp với dữ liệu trong TypeScript thông qua `ngModel` và các sự kiện như `(click)` hoặc `(input)`.
+- Dữ liệu được hiển thị động dựa trên mảng `filteredContacts`, và các hành động (thêm, xóa, lọc) được xử lý bởi các hàm trong file TypeScript.
+
+---
+
+ 2. File SCSS (`contact_list.component.scss`)
+File này định dạng giao diện cho file HTML.
+
+# Các thành phần định kiểu:
+- `.contact-list`:
+  - Đặt chiều rộng cố định (`600px`) và căn giữa (`margin: 50px auto`).
+- `.add-contact, .search`:
+  - Thêm khoảng cách dưới (`margin-bottom: 20px`) để phân tách các phần tử.
+- `input`:
+  - Định dạng ô nhập liệu với padding, margin, và chiều rộng cố định (`200px`).
+- `button`:
+  - Nút có màu nền xanh (`#4CAF50`), chữ trắng, và hiệu ứng hover đổi màu (`#45a049`).
+- `table, th, td`:
+  - Bảng chiếm toàn bộ chiều rộng (`width: 100%`), có viền (`border: 1px solid #ddd`), và căn trái.
+  - Tiêu đề bảng (`th`) có màu nền xám nhạt (`#f2f2f2`).
+- `td button`:
+  - Nút "Xóa" trong bảng có màu đỏ (`#f44336`) và đổi màu khi hover (`#da190b`).
+
+# Cách hoạt động:
+- File SCSS chỉ định dạng giao diện, không ảnh hưởng đến logic. Nó đảm bảo ứng dụng trông đẹp mắt và dễ sử dụng.
+
+---
+
+ 3. File TypeScript (`contact_list.component.ts`)
+File này chứa logic chính của ứng dụng.
+
+# Cấu trúc và logic:
+- Interface `Contact`:
+  - Định nghĩa cấu trúc của một liên hệ với các thuộc tính `id`, `name`, `email`, và `phone`. Tuy nhiên, trong code hiện tại chỉ sử dụng `name` và `phone`.
+- Component:
+  - Sử dụng decorator `@Component` để liên kết với file HTML và SCSS.
+- Thuộc tính:
+  - `contacts`: Mảng chứa danh sách liên hệ ban đầu với 3 liên hệ mẫu.
+  - `filteredContacts`: Mảng hiển thị danh sách liên hệ đã được lọc (ban đầu sao chép từ `contacts`).
+  - `newContact`: Đối tượng lưu thông tin liên hệ mới từ ô nhập liệu.
+  - `searchTerm`: Chuỗi lưu từ khóa tìm kiếm.
+- Phương thức:
+  - `addContact()`:
+    - Kiểm tra xem `newContact.name` và `newContact.phone` có giá trị không.
+    - Nếu có, thêm một bản sao của `newContact` vào `contacts`, cập nhật `filteredContacts` bằng cách gọi `filterContacts()`, rồi đặt lại `newContact` về rỗng.
+  - `deleteContact(contact)`:
+    - Lọc `contacts` để loại bỏ liên hệ được chọn, sau đó cập nhật `filteredContacts`.
+  - `filterContacts()`:
+    - Nếu `searchTerm` rỗng, sao chép toàn bộ `contacts` vào `filteredContacts`.
+    - Nếu có `searchTerm`, lọc `contacts` để chỉ giữ lại các liên hệ có tên chứa `searchTerm` (không phân biệt hoa thường).
+
+# Cách hoạt động:
+- File TypeScript quản lý dữ liệu và xử lý các sự kiện từ giao diện:
+  - Khi người dùng thêm liên hệ, `addContact()` cập nhật `contacts` và giao diện tự động phản ánh thay đổi qua `filteredContacts`.
+  - Khi xóa, `deleteContact()` loại bỏ liên hệ và cập nhật giao diện.
+  - Khi tìm kiếm, `filterContacts()` lọc danh sách theo từ khóa và cập nhật bảng.
+
+---
+
+ Cách 3 file phối hợp với nhau
+1. HTML: Hiển thị giao diện và liên kết dữ liệu/logic từ TypeScript thông qua các directive như `ngModel`, `*ngFor`, và sự kiện như `(click)`.
+2. SCSS: Định dạng giao diện từ HTML, đảm bảo bố cục rõ ràng và trực quan.
+3. TypeScript: Quản lý dữ liệu (`contacts`, `filteredContacts`, `newContact`, `searchTerm`) và xử lý logic (thêm, xóa, lọc).
+
+# Luồng hoạt động tổng thể:
+- Người dùng nhập tên và số điện thoại → Nhấn nút thêm → `addContact()` cập nhật `contacts` → Giao diện tự động hiển thị danh sách mới.
+- Người dùng nhập từ khóa tìm kiếm → `filterContacts()` lọc danh sách → Bảng chỉ hiển thị các liên hệ phù hợp.
+- Người dùng nhấn "Xóa" → `deleteContact()` loại bỏ liên hệ → Giao diện cập nhật ngay lập tức.
+
+---
+
+ Ghi chú thêm
+- Có một sự không nhất quán nhỏ: Interface `Contact` định nghĩa `id` và `email`, nhưng trong code chỉ dùng `name` và `phone`. Bạn có thể bỏ `id` và `email` trong interface hoặc thêm chúng vào logic nếu cần.
+- Hàm `ngOnInit()` hiện tại trống rỗng, bạn có thể dùng nó để khởi tạo dữ liệu nếu muốn (ví dụ: tải danh sách từ API).
+

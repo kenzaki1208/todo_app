@@ -1,0 +1,32 @@
+<div class="contact-list">
+    <h1>Danh sách liên hệ</h1>
+
+    <div class="add-contact">
+        <input type="text" [(ngModel)]="newContact.name" placeholder="Tên..."/>
+        <input type="text" [(ngModel)]="newContact.phone" placeholder="Số điện thoại...">
+        <button (click)="addContact()"></button>
+    </div>
+
+    <div class="search">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Tìm kiếm theo tên..." (input)="filterContacts()"/>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Tên</th>
+                <th>Số điện thoại</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let contact of filteredContacts">
+                <td>{{contact.name}}</td>
+                <td>{{contact.phone}}</td>
+                <td>
+                    <button (click)="deleteContact(contact)">Xóa</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

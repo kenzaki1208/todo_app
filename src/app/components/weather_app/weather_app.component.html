@@ -1,0 +1,31 @@
+<div class="container mt-5">
+    <h1 class="text-center">Ứng dụng dự báo thời tiết</h1>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-6">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Nhập tên thành phố..."
+                [(ngModel)]="city" (keyup.enter)="getWeather()">
+
+                <button class="btn btn-primary" (click)="getWeather()">Tra cứu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center" *ngIf = "weatherData">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ weatherData.name }}</h2>
+                    <p class="card-text">Nhiệt độ: {{ weatherData.main.temp }} °C</p>
+                    <p class="card-text">Độ ẩm: {{ weatherData.main.humidity }} %</p>
+                    <p class="card-text">Mô tả: {{ weatherData.weather[0].description }}</p>
+                    <img 
+                        [src]="weatherData.weather[0].icon" 
+                        alt="Weather icon"
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

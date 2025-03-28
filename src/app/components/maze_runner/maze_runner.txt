@@ -1,0 +1,322 @@
+Chúc mừng bạn đã hoàn thành Game Tìm Đường (Maze Runner)! Mình sẽ phân tích chi tiết cách ba file `maze.component.ts`, `maze.component.html`, và `maze.component.scss` hoạt động cùng nhau để tạo nên game này. Phân tích sẽ giúp bạn hiểu rõ cách các thành phần tương tác và vai trò của từng file trong việc xây dựng game.
+
+---
+
+ Tổng quan về cách hoạt động của game
+- Mục tiêu: Người chơi điều khiển một nhân vật (ô màu xanh dương) di chuyển trong mê cung 5x5 để đến đích (ô màu đỏ) bằng phím mũi tên. Mê cung có các bức tường (ô màu xám đậm) ngăn cản di chuyển.
+- Cơ chế:
+  - Mê cung được biểu diễn bằng mảng 2 chiều (`maze`), với `0` là đường đi và `1` là tường.
+  - Người chơi bắt đầu ở vị trí (0,0) và cần di chuyển đến đích (4,4).
+  - Người chơi không thể đi qua tường hoặc ra ngoài mê cung.
+  - Khi đến đích, thông báo chiến thắng hiển thị, và người chơi có thể chơi lại.
+
+---
+
+ 1. Phân tích file `maze.component.ts` (Logic)
+
+# Nội dung file
+```typescript
+import { Component, HostListener } from '@angular/core';
+
+@Component({
+    selector: 'app-maze',
+    templateUrl: './maze.component.html',
+    styleUrls: ['./maze.component.scss']
+})
+export class MazeComponent {
+    maze: number[][] = [
+        [0, 0, 1, 0, 0],
+        [1, 0, 1, 1, 0],
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 1, 0],
+    ];
+    playerPosition = { x: 0, y: 0 };
+    endPosition = { x: 4, y: 4 };
+    gameWon = false;
+    
+    constructor() {
+        this.startGame();
+    }
+
+    startGame() {
+        this.playerPosition = { x: 0, y: 0 };
+        this.gameWon = false;
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        if (this.gameWon) return;
+
+        const { x, y } = this.playerPosition;
+        let newX = x;
+        let newY = y;
+
+        switch (event.key) {
+            case 'ArrowUp':
+                newY = y - 1;
+                break;
+            case 'ArrowDown':
+                newY = y + 1;
+                break;
+            case 'ArrowLeft':
+                newX = x - 1;
+                break;
+            case 'ArrowRight':
+                newX = x + 1;
+                break;
+            default:
+                return;
+        }
+
+        if (
+            newX >= 0 && newX < this.maze[0].length &&
+            newY >= 0 && newY < this.maze.length && 
+            this.maze[newY][newX] === 0
+        ) {
+            this.playerPosition = { x: newX, y: newY };
+            this.checkWin();
+        }
+    }
+
+    checkWin() {
+        if (
+            this.playerPosition.x === this.endPosition.x &&
+            this.playerPosition.y === this.endPosition.y
+        ) {
+            this.gameWon = true;
+        }
+    }
+
+    resetGame() {
+        this.startGame();
+    }
+}
+```
+
+# Vai trò và cách hoạt động
+1. Khai báo và khởi tạo dữ liệu:
+   - `maze: number[][]`: Mảng 2 chiều 5x5 đại diện cho mê cung.
+     - `0`: Đường đi (ô trắng).
+     - `1`: Tường (ô xám đậm).
+   - `playerPosition = { x: 0, y: 0 }`: Vị trí hiện tại của người chơi (bắt đầu ở góc trên bên trái).
+   - `endPosition = { x: 4, y: 4 }`: Vị trí đích (góc dưới bên phải).
+   - `gameWon = false`: Trạng thái chiến thắng (true khi người chơi đến đích).
+
+2. Khởi động game:
+   - `constructor()` gọi `startGame()` để khởi tạo game khi component được tạo.
+   - `startGame()`: Đặt lại vị trí người chơi về (0,0) và đặt `gameWon = false`.
+
+3. Xử lý sự kiện phím (`handleKeyboardEvent`):
+   - `@HostListener('document:keydown', ['$event'])`: Lắng nghe sự kiện phím trên toàn bộ trang.
+   - Nếu `gameWon = true`, không xử lý phím (người chơi đã thắng, không thể di chuyển thêm).
+   - Lấy tọa độ hiện tại của người chơi (`x`, `y`) từ `playerPosition`.
+   - Dựa trên phím được nhấn (`ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`), tính toán tọa độ mới (`newX`, `newY`):
+     - `ArrowUp`: Giảm `y` (di chuyển lên).
+     - `ArrowDown`: Tăng `y` (di chuyển xuống).
+     - `ArrowLeft`: Giảm `x` (di chuyển trái).
+     - `ArrowRight`: Tăng `x` (di chuyển phải).
+   - Kiểm tra xem vị trí mới có hợp lệ không:
+     - `newX` và `newY` phải nằm trong giới hạn của mê cung (`0 <= newX < 5`, `0 <= newY < 5`).
+     - Ô tại vị trí mới (`maze[newY][newX]`) phải là đường đi (`0`), không phải tường (`1`).
+   - Nếu hợp lệ, cập nhật `playerPosition` và gọi `checkWin()`.
+
+4. Kiểm tra chiến thắng (`checkWin`):
+   - So sánh `playerPosition` với `endPosition`.
+   - Nếu tọa độ người chơi khớp với tọa độ đích, đặt `gameWon = true`.
+
+5. Chơi lại (`resetGame`):
+   - Gọi `startGame()` để đặt lại vị trí người chơi và trạng thái game.
+
+# Tương tác với HTML
+- Các biến `maze`, `playerPosition`, `endPosition`, và `gameWon` được sử dụng trong template (`maze.component.html`) để hiển thị mê cung, vị trí người chơi, đích, và thông báo chiến thắng.
+- Hàm `resetGame()` được gọi khi người chơi nhấn nút "Chơi lại".
+
+---
+
+ 2. Phân tích file `maze.component.html` (Giao diện)
+
+# Nội dung file
+```html
+<h1>Game tìm đường</h1>
+<p>Dùng phím mũi tên để di chuyển đến đích (ô màu đỏ).</p>
+<div class="maze">
+    <div *ngFor="let row of maze; let y = index" class="row">
+        <div 
+            *ngFor="let cell of row; let x = index" class="cell" 
+            [class.wall]="cell === 1"
+            [class.player]="playerPosition.x === x && playerPosition.y === y"
+            [class.end]="endPosition.x === x && endPosition.y === y">
+        </div>
+    </div>
+</div>
+<p *ngIf="gameWon">Chúc mừng! Bạn đã đến đích!</p>
+<button (click)="resetGame()">Chơi lại</button>
+```
+
+# Vai trò và cách hoạt động
+1. Tiêu đề và hướng dẫn:
+   - `<h1>Game tìm đường</h1>`: Hiển thị tiêu đề game.
+   - `<p>Dùng phím mũi tên để di chuyển đến đích (ô màu đỏ).</p>`: Hướng dẫn người chơi.
+
+2. Hiển thị mê cung:
+   - `<div class="maze">`: Container chính của mê cung, được định dạng bởi CSS để căn giữa.
+   - `<div *ngFor="let row of maze; let y = index" class="row">`: Lặp qua từng hàng của mảng `maze`. `y` là chỉ số hàng (0 đến 4).
+   - `<div *ngFor="let cell of row; let x = index" class="cell" ...>`: Lặp qua từng ô trong hàng. `x` là chỉ số cột (0 đến 4).
+     - Mỗi ô là một `div` với class `cell`, đại diện cho một ô trong mê cung.
+     - `[class.wall]="cell === 1"`: Nếu giá trị ô là `1`, thêm class `wall` (tường, màu xám đậm).
+     - `[class.player]="playerPosition.x === x && playerPosition.y === y"`: Nếu tọa độ ô khớp với `playerPosition`, thêm class `player` (người chơi, màu xanh dương).
+     - `[class.end]="endPosition.x === x && endPosition.y === y"`: Nếu tọa độ ô khớp với `endPosition`, thêm class `end` (đích, màu đỏ).
+
+3. Thông báo chiến thắng:
+   - `<p *ngIf="gameWon">Chúc mừng! Bạn đã đến đích!</p>`: Hiển thị thông báo khi `gameWon = true`.
+
+4. Nút chơi lại:
+   - `<button (click)="resetGame()">Chơi lại</button>`: Gọi hàm `resetGame()` trong `maze.component.ts` khi người chơi nhấn nút.
+
+# Tương tác với TypeScript và CSS
+- Với TypeScript:
+  - Sử dụng các biến `maze`, `playerPosition`, `endPosition`, và `gameWon` từ `maze.component.ts` để hiển thị mê cung và trạng thái game.
+  - Gọi hàm `resetGame()` khi người chơi nhấn nút "Chơi lại".
+- Với CSS:
+  - Các class (`maze`, `row`, `cell`, `wall`, `player`, `end`) được định nghĩa trong `maze.component.scss` để định dạng giao diện.
+
+---
+
+ 3. Phân tích file `maze.component.scss` (Định dạng giao diện)
+
+# Nội dung file
+```scss
+h1 {
+  text-align: center;
+  font-size: 24px;
+}
+
+p {
+  text-align: center;
+  font-size: 16px;
+}
+
+.maze {
+  display: inline-block;
+  margin: 20px auto;
+  text-align: center;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #000;
+  background-color: #fff;
+}
+
+.wall {
+  background-color: #333;
+}
+
+.player {
+  background-color: #00f;
+}
+
+.end {
+  background-color: #f00;
+}
+
+button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+```
+
+# Vai trò và cách hoạt động
+1. Định dạng tiêu đề và hướng dẫn:
+   - `h1`: Căn giữa tiêu đề và đặt kích thước chữ 24px.
+   - `p`: Căn giữa đoạn văn bản hướng dẫn và đặt kích thước chữ 16px.
+
+2. Định dạng mê cung:
+   - `.maze`:
+     - `display: inline-block`: Đảm bảo mê cung không chiếm toàn bộ chiều rộng, chỉ chiếm không gian cần thiết.
+     - `margin: 20px auto`: Căn giữa mê cung theo chiều ngang.
+     - `text-align: center`: Căn giữa nội dung bên trong.
+   - `.row`:
+     - `display: flex`: Sắp xếp các ô trong cùng một hàng theo chiều ngang.
+   - `.cell`:
+     - `width: 50px; height: 50px`: Đặt kích thước mỗi ô là 50x50px.
+     - `border: 1px solid #000`: Thêm viền đen để các ô dễ nhìn.
+     - `background-color: #fff`: Màu nền mặc định là trắng (đường đi).
+
+3. Định dạng các loại ô:
+   - `.wall`:
+     - `background-color: #333`: Tường có màu xám đậm.
+   - `.player`:
+     - `background-color: #00f`: Người chơi có màu xanh dương.
+   - `.end`:
+     - `background-color: #f00`: Đích có màu đỏ.
+
+4. Định dạng nút:
+   - `button`:
+     - `display: block`: Đảm bảo nút chiếm toàn bộ chiều rộng của container cha.
+     - `margin: 20px auto`: Căn giữa nút.
+     - `padding: 10px 20px`: Thêm khoảng đệm để nút dễ nhìn.
+     - `font-size: 16px`: Kích thước chữ 16px.
+     - `cursor: pointer`: Con trỏ chuột đổi thành hình bàn tay khi hover, cho biết nút có thể nhấn.
+
+# Tương tác với HTML
+- Các class được áp dụng động trong `maze.component.html` (`cell`, `wall`, `player`, `end`) được định nghĩa ở đây để hiển thị giao diện mê cung.
+- CSS đảm bảo các ô có kích thước, màu sắc, và vị trí phù hợp để người chơi dễ nhìn và tương tác.
+
+---
+
+ Cách ba file tương tác với nhau
+
+1. TypeScript (`maze.component.ts`) → HTML (`maze.component.html`):
+   - Cung cấp dữ liệu:
+     - `maze`: Được sử dụng trong `*ngFor` để vẽ mê cung.
+     - `playerPosition` và `endPosition`: Được sử dụng trong `[class.player]` và `[class.end]` để xác định ô nào là người chơi và đích.
+     - `gameWon`: Được sử dụng trong `*ngIf` để hiển thị thông báo chiến thắng.
+   - Xử lý sự kiện:
+     - `resetGame()`: Được gọi khi người chơi nhấn nút "Chơi lại".
+     - `handleKeyboardEvent`: Lắng nghe phím mũi tên và cập nhật `playerPosition`, từ đó HTML tự động cập nhật giao diện nhờ data binding.
+
+2. HTML (`maze.component.html`) → CSS (`maze.component.scss`):
+   - HTML sử dụng các class (`maze`, `row`, `cell`, `wall`, `player`, `end`) để áp dụng các kiểu định dạng từ CSS.
+   - Các class động (`wall`, `player`, `end`) được thêm vào dựa trên logic trong TypeScript, và CSS định nghĩa cách hiển thị (màu sắc, kích thước, viền).
+
+3. CSS (`maze.component.scss`) → TypeScript (`maze.component.ts`):
+   - CSS không trực tiếp tương tác với TypeScript, nhưng nó phản ánh trạng thái của game thông qua các class động được thêm bởi TypeScript (qua HTML).
+   - Ví dụ: Khi `playerPosition` thay đổi, HTML thêm class `player` vào ô mới, và CSS áp dụng màu xanh dương cho ô đó.
+
+---
+
+ Luồng hoạt động tổng thể
+1. Khởi tạo:
+   - Khi component `MazeComponent` được tạo, `constructor` gọi `startGame()`, khởi tạo `playerPosition` và `gameWon`.
+   - HTML sử dụng `maze` để vẽ mê cung, hiển thị người chơi ở (0,0) và đích ở (4,4).
+
+2. Tương tác người dùng:
+   - Người chơi nhấn phím mũi tên → `handleKeyboardEvent` trong TypeScript được gọi.
+   - TypeScript tính toán vị trí mới (`newX`, `newY`), kiểm tra tính hợp lệ, và cập nhật `playerPosition`.
+   - HTML tự động cập nhật giao diện nhờ data binding: ô mới được thêm class `player`, ô cũ mất class `player`.
+
+3. Chiến thắng:
+   - Khi `playerPosition` khớp với `endPosition`, `checkWin()` đặt `gameWon = true`.
+   - HTML hiển thị thông báo chiến thắng nhờ `*ngIf="gameWon"`.
+
+4. Chơi lại:
+   - Người chơi nhấn nút "Chơi lại" → `resetGame()` được gọi, đặt lại trạng thái game.
+   - HTML và CSS cập nhật giao diện để hiển thị mê cung ban đầu.
+
+---
+
+ Kết luận
+- TypeScript (`maze.component.ts`): Xử lý logic game (dữ liệu mê cung, di chuyển, kiểm tra chiến thắng).
+- HTML (`maze.component.html`): Hiển thị giao diện và liên kết dữ liệu từ TypeScript với giao diện (qua data binding).
+- CSS (`maze.component.scss`): Định dạng giao diện để mê cung, người chơi, và đích hiển thị rõ ràng và trực quan.
+
