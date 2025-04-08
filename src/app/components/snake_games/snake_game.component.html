@@ -1,0 +1,15 @@
+<div class="game-container">
+    <h2>Snake Game</h2>
+
+    <div class="grid">
+        <div *ngFor="let row of gridRows" class="row">
+            <div *ngFor="let col of gridCols" class="cell" [class.snake]="isSnake(col, row)" [class.food]="isFood(col, row)">
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="gameOver" class="game-over">
+        <p>Game Over!</p>
+        <button (click)="resetGame()">Chơi lại</button>
+    </div>
+</div>

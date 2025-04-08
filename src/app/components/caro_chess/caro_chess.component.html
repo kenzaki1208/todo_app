@@ -1,0 +1,15 @@
+<div class="game-container">
+    <h2>Caro Chess</h2>
+
+    <p>Lượt của: {{ currentPlayer }}</p>
+    <div class="board">
+        <button *ngFor="let cell of board; let i = index" [disabled]="cell || isGameOver"
+        (click)="makeMove(i)">
+            {{cell}}
+        </button>
+    </div>
+    <div *ngIf="winner" class="result">
+        <p>{{ winner === 'Hòa' ? 'Hòa!' : 'Người thắng: ' + winner }}</p>
+        <button (click)="resetGame()">Chơi lại</button>
+    </div>
+</div>

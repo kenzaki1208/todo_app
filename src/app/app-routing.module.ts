@@ -9,6 +9,8 @@ import { RegisterComponent } from './components/form/register/register.component
 import { GuessNumberComponent } from './components/guess-number/guess_number.component';
 import { MemoryComponent } from './components/memory_card_games/memory.component';
 import { MazeComponent } from './components/maze_runner/maze.component';
+import { CaroChessComponent } from './components/caro_chess/caro_chess.component';
+import { SnakeGameComponent } from './components/snake_games/snake_game.component';
 
 const routes: Routes = [
   {
@@ -55,6 +57,16 @@ const routes: Routes = [
     component: MazeComponent,
     path: 'maze',
     title: 'maze_runner'
+  },
+  {
+    component: CaroChessComponent,
+    path: 'caro',
+    title: 'caro_chess'
+  },
+  {
+    component: SnakeGameComponent,
+    path: 'snake',
+    title: 'snake_game'
   },
   {
     path: '',

@@ -16,6 +16,8 @@ import { LoginComponent } from './components/form/login/login.component';
 import { GuessNumberComponent } from './components/guess-number/guess_number.component';
 import { MemoryComponent } from './components/memory_card_games/memory.component';
 import { MazeComponent } from './components/maze_runner/maze.component';
+import { CaroChessComponent } from './components/caro_chess/caro_chess.component';
+import { SnakeGameComponent } from './components/snake_games/snake_game.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +30,9 @@ import { MazeComponent } from './components/maze_runner/maze.component';
     LoginComponent,
     GuessNumberComponent,
     MemoryComponent,
-    MazeComponent
+    MazeComponent,
+    CaroChessComponent,
+    SnakeGameComponent
   ],
   imports: [
     BrowserModule,
